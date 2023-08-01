@@ -1,0 +1,50 @@
+procs:
+  partition-docker:
+    autostart: false
+    cmd: [ "docker", "compose", "up", "--build", "partition" ]
+    stop: {send-keys: ["<C-c>"]}
+  partition-local:
+    cmd: [ "cargo", "run", "--release", "--manifest-path=rust-crates/partition-api/Cargo.toml" ]
+  ros2-client:
+    cmd: [ "docker", "compose", "run", "-e", "PARTITION_API_URL=http://localhost:8000", "--build", "--rm", "--name", "client-ros2", "client-ros2" ]
+    stop: {send-keys: ["<C-c>"]}
+  ros2-client-1:
+    autostart: false
+    # cmd: [ "docker", "exec", "-it", "client-ros2", "bash" ]
+    cmd: [ "docker", "compose", "run", "-e", "PARTITION_API_URL=http://localhost:8000", "--build", "--rm", "--name", "client-ros2-1", "client-ros2-1" ]
+    stop: {send-keys: ["<C-c>"]}
+  ros2-client-2:
+    autostart: false
+    # cmd: [ "docker", "exec", "-it", "client-ros2", "bash" ]
+    cmd: [ "docker", "compose", "run", "-e", "PARTITION_API_URL=http://localhost:8000", "--build", "--rm", "--name", "client-ros2-2", "client-ros2-2" ]
+    stop: {send-keys: ["<C-c>"]}
+  ros2-client-bag:
+    autostart: false
+    cmd: [ "docker", "exec", "-it", "client-ros2", "bash", "-c", ". /ros_entrypoint.sh && ros2 bag play ./bag_files/rosbag2_2023_01_31-10_07_32" ]
+  ros2-polygon-interface:
+    autostart: true
+    cmd: [ "docker", "compose", "up", "polygon-interface" ]
+    stop: {send-keys: ["<C-c>"]}
+  simulation:
+    autostart: true
+    cmd: [ "docker", "compose", "up", "--build", "simulation" ]
+    stop: {send-keys: ["<C-c>"]}
+  simulation-1:
+    autostart: false
+    cmd: [ "docker", "exec", "-it", "simulation", "bash" ]
+  simulation-rviz:
+    autostart: false
+    cmd: [ "docker", "exec", "simulation", "/root/rviz-config/launch-rviz.sh" ]
+  simulation-rviz-publish-zone:
+    autostart: false
+    cmd: [ "docker", "exec", "-it", "simulation", "bash", "-c", ". /ros_entrypoint.sh && ros2 service call /publish_zone example_interfaces/srv/Trigger {}" ]
+  simulation-rviz-remove-last-point:
+    autostart: false
+    cmd: [ "docker", "exec", "-it", "simulation", "bash", "-c", ". /ros_entrypoint.sh && ros2 service call /remove_last_point example_interfaces/srv/Trigger {}" ]
+  simulation-rviz-reset-polygon:
+    autostart: false
+    cmd: [ "docker", "exec", "-it", "simulation", "bash", "-c", ". /ros_entrypoint.sh && ros2 service call /reset_zone example_interfaces/srv/Trigger {}" ]
+  map-expander:
+    autostart: true
+    cmd: [ "docker", "compose", "up", "--build", "simulation-map-expander" ]
+    stop: {send-keys: ["<C-c>"]}
