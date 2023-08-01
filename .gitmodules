@@ -1,0 +1,18 @@
+[submodule "python-client"]
+	path = python-client
+	url = git@github.com:ISM-Thesis-MultiRobot-Partitioning/python-client.git
+[submodule "ros2-client/ros2_ws/src/polygon_map"]
+	path = ros2-client/ros2_ws/src/polygon_map
+	url = git@github.com:ISM-Thesis-MultiRobot-Partitioning/ros2-client.git
+[submodule "rust-crates"]
+	path = rust-crates
+	url = git@github.com:ISM-Thesis-MultiRobot-Partitioning/rust-crates.git
+[submodule "simulation/mrs-mapping-simulation"]
+	path = simulation/mrs-mapping-simulation
+	url = https://github.com/Mechaick/mrs-mapping-simulation.git
+[submodule "simulation-map-empty"]
+	path = simulation-map-empty
+	url = git@github.com:ISM-Thesis-MultiRobot-Partitioning/simulation-map-empty.git
+[submodule "simulation-map-expand"]
+	path = simulation-map-expand
+	url = git@github.com:ISM-Thesis-MultiRobot-Partitioning/simulation-map-expand.git
