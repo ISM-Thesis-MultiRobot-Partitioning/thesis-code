@@ -1,0 +1,177 @@
+---
+services:
+  client-filepath:
+    build:
+      context: ./python-client
+    command: pipenv run python filepath.py
+    environment:
+      PARTITION_API_URL: http://partition-api:8000
+      # PARTITION_API_URL: http://172.17.0.1:8000
+    volumes:
+      - share-data:/dev/shm
+
+  client-http:
+    build:
+      context: ./python-client
+    command: pipenv run python post.py
+    environment:
+      PARTITION_API_URL: http://partition-api:8000
+    volumes:
+      - share-data:/dev/shm
+
+  client-ros2:
+    build:
+      context: ./ros2-client
+    container_name: client-ros2
+    env_file: vars.env
+    environment:
+      # PARTITION_API_URL: http://partition-api:8000
+      # PARTITION_API_ROUTE: PolygonToCellMapConvexHull
+      # PARTITION_API_ROUTE: PolygonToCellMapConcaveHull
+      # PARTITION_API_ROUTE: PolygonToCellMapContoursAngularSorted
+      PARTITION_API_URL: http://localhost:8000
+      PARTITION_API_ROUTE: PolygonToCellMapContoursSorted
+      OUTPUT_CHANNEL: /assigned_border_leo02
+      MY_ODOM_TOPIC: /leo02/pose
+      OTHER_ODOM_TOPICS: "/leo03/pose /leo07/pose /leo09/pose"
+      # MY_ODOM_TOPIC: /tb3_1/odom
+      # OTHER_ODOM_TOPICS: "/tb3_0/odom /tb3_2/odom"
+    network_mode: host
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+      # - share-data:/dev/shm
+      # - ./ros2-client/ros2_ws:/root/ros2_ws
+
+  client-ros2-1:
+    build:
+      context: ./ros2-client
+    container_name: client-ros2-1
+    env_file: vars.env
+    environment:
+      # PARTITION_API_URL: http://partition-api:8000
+      # PARTITION_API_ROUTE: PolygonToCellMapConcaveHull
+      # MY_ODOM_TOPIC: /tb3_0/odom
+      # OTHER_ODOM_TOPICS: "/tb3_1/odom /tb3_2/odom"
+      # OUTPUT_CHANNEL: /assigned_border_tb3_0
+      PARTITION_API_URL: http://localhost:8000
+      PARTITION_API_ROUTE: PolygonToCellMapConvexHull
+      OUTPUT_CHANNEL: /assigned_border_leo07
+      MY_ODOM_TOPIC: /leo07/pose
+      OTHER_ODOM_TOPICS: "/leo03/pose /leo02/pose /leo09/pose"
+    network_mode: host
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  client-ros2-2:
+    build:
+      context: ./ros2-client
+    container_name: client-ros2-2
+    env_file: vars.env
+    environment:
+      # PARTITION_API_URL: http://partition-api:8000
+      # PARTITION_API_ROUTE: PolygonToCellMapConvexHull
+      # MY_ODOM_TOPIC: /tb3_2/odom
+      # OTHER_ODOM_TOPICS: "/tb3_1/odom /tb3_0/odom"
+      # OUTPUT_CHANNEL: /assigned_border_tb3_2
+      PARTITION_API_URL: http://localhost:8000
+      PARTITION_API_ROUTE: PolygonToCellMapConcaveHull
+      OUTPUT_CHANNEL: /assigned_border_leo09
+      MY_ODOM_TOPIC: /leo09/pose
+      OTHER_ODOM_TOPICS: "/leo03/pose /leo02/pose /leo07/pose"
+    network_mode: host
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  partition:
+    build:
+      context: ./rust-crates
+    container_name: partition-api
+    ports:
+      - 8000:8000
+    volumes:
+      - share-data:/dev/shm
+      - /dev/shm:/dev/shm
+
+  polygon-interface:
+    build:
+      context: ./polygon-interface
+    env_file: vars.env
+    network_mode: host
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  # https://www.howtogeek.com/devops/how-to-run-gui-applications-in-a-docker-container/
+  simulation:
+    build:
+      context: ./simulation
+      dockerfile: mrs-mapping-simulation/Dockerfile
+    container_name: simulation
+    devices:
+      - /dev/dri:/dev/dri
+    env_file: vars.env
+    environment:
+      DISPLAY: ${DISPLAY}
+    network_mode: host
+    # networks:
+    #   - host_network
+    #   - default
+    privileged: true
+    volumes:
+      - ./simulation/mrs-mapping-simulation:/root/ros2_ws/src/mrs-mapping-simulation
+      - /tmp/gazebo:/root/.gazebo
+      - /tmp/rviz2:/root/.rviz2
+      - ./simulation/rviz-config:/root/rviz-config
+      - ~/.Xauthority:/root/.Xauthority:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  simulation-map-expander:
+    build:
+      context: ./simulation-map-expand/
+    container_name: simulation-map-expander
+    env_file: vars.env
+    environment:
+      MAP_TOPIC: /tb3_1/map
+      # MAP_TOPIC: /leo03/map
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  map-empty:
+    build:
+      context: ./simulation-map-empty/
+    container_name: simulation-map-empty
+    env_file: vars.env
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+  rviz:
+    image: osrf/ros:foxy-desktop
+    command: /root/rviz-config/launch-rviz.sh
+    container_name: rviz
+    devices:
+      - /dev/dri:/dev/dri
+    env_file: vars.env
+    environment:
+      DISPLAY: ${DISPLAY}
+    network_mode: host
+    privileged: true
+    volumes:
+      - /tmp/gazebo:/root/.gazebo
+      - /tmp/rviz2:/root/.rviz2
+      - ./rviz/rviz-config:/root/rviz-config
+      - ~/.Xauthority:/root/.Xauthority:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/shm:/dev/shm # required when using host network and interacting with other ROS2 instances
+
+
+# networks:
+#   host_network:
+#     external: true
+#     name: host
+
+volumes:
+  share-data:
