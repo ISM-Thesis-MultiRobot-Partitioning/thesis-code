@@ -21,7 +21,7 @@ git clone --recurse-submodules git@github.com:ISM-Thesis-MultiRobot-Partitioning
 
 The idea was to have isolated microservices, hence our use of docker containers. A [`docker-file.yml`](./docker-file.yml) is provided to make management of the containers easier; they include setting up of environment variables, and container specific setup.
 
-To further facilitate usage of the containers, we also used [mprocs][mprocs]. An [`mprocs.yaml`](./mprocs.yaml) is given to have a fully and automatically created setup. The config file sets up processes for each docker container, which can very easily be started, restarted and stopped.
+To further facilitate usage of the containers, we also used [mprocs][mprocs]. An [`mprocs.yaml`](./mprocs.yaml) is given to have a fully and automatically created setup. The config file sets up processes for each docker container, which can very easily be started, restarted and stopped. You can simple launch mprocs with the given configuration using `mprocs` command without arguments.
 
 [mprocs]: https://github.com/pvolok/mprocs
 [mrs]: https://github.com/Mechaick/mrs-mapping-simulation.git
