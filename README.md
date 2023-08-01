@@ -16,7 +16,7 @@ git clone --recurse-submodules git@github.com:ISM-Thesis-MultiRobot-Partitioning
 **NOTE**: There are issues with the [simulation][mrs] as of commit `c498919d74b7a99f039322a95c902d549d526280` on the repository in question. Please double-check with `git log` in the corresponding folder, whether or not this is the latest commit. If it is, we have provided a [patch file](./simulation/simulation.patch) to amend them, as well as add a dockerfile. Please run the following command in bash to apply the patch before launching the simulation (the parenthesis will avoid switching directory in your shell with the `cd` command by running the commands in a subshell). Please also ensure that the patch has not been applied already (by checking the commit SHA with `git log`) as you will otherwise run into trouble.
 
 ```bash
-(cd simulation/mrs-mapping-simulation/ && git am ../simulation.patch)
+(cd simulation/mrs-mapping-simulation/ && git checkout -b local && git am ../simulation.patch)
 ```
 
 The idea was to have isolated microservices, hence our use of docker containers. A [`docker-file.yml`](./docker-file.yml) is provided to make management of the containers easier; they include setting up of environment variables, and container specific setup.
